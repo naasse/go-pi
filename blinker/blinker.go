@@ -9,26 +9,33 @@ package main
 import (
 	"fmt"
 	"github.com/stianeikeland/go-rpio"
-	"os"
-	"time"
-	"strconv"
 	"math/rand"
+	"os"
+	"strconv"
+	"time"
 )
 
 var (
-	// Use GPIO pin 17, corresponds to physical pin 11 on the pi
-	pin = rpio.Pin(17)
-
 	// Supported pins. Map the GPIO pin to the physical pin.
 	pins = make(map[int]int)
 )
 
 func initPins() {
+	pins[4] = 7
+	pins[5] = 29
+	pins[6] = 31
 	pins[12] = 32
-	pins[16] = 36
+	pins[13] = 33
+	pins[16] = 36 // I'm unable to blink this pin.
 	pins[17] = 11
+	pins[18] = 12
+	pins[19] = 35
 	pins[20] = 38
 	pins[21] = 40
+	pins[23] = 16
+	pins[24] = 18
+	pins[25] = 22
+	pins[26] = 37
 	pins[27] = 13
 }
 
@@ -40,13 +47,13 @@ func main() {
 	}
 
 	// Initialize the pins to blink
-	var togglePins = make([]rpio.Pin, len(os.Args) - 1 )
+	var togglePins = make([]rpio.Pin, len(os.Args)-1)
 
 	// Initialize the pin mappings
 	initPins()
 
-	for i:= 1; i < len(os.Args); i++ {
-		pinNumber, err:= strconv.Atoi(os.Args[i])
+	for i := 1; i < len(os.Args); i++ {
+		pinNumber, err := strconv.Atoi(os.Args[i])
 		if err != nil {
 			fmt.Printf("%q is not a number.\n", os.Args[i])
 			os.Exit(1)
@@ -60,7 +67,7 @@ func main() {
 		}
 
 		// Add it to the array of pins to blink
-		togglePins[i - 1] = rpio.Pin(pinNumber)
+		togglePins[i-1] = rpio.Pin(pinNumber)
 	}
 
 	// Open and map memory to access gpio, check for errors
@@ -73,7 +80,7 @@ func main() {
 	defer rpio.Close()
 
 	// Set pins to output mode
-	for i:= 0; i < len(togglePins); i++ {
+	for i := 0; i < len(togglePins); i++ {
 		togglePins[i].Output()
 	}
 
