@@ -42,9 +42,12 @@ func main() {
 	song := files[rand.Intn(len(files))]
 	fmt.Printf("Now Playing: %s\n", song)
 
+	// First, ensure no other songs are playing
+	exec.Command("killall", "omxplayer.bin").Run()
+
 	// Begin playing
 	cmd := exec.Command("omxplayer", song)
-	err = cmd.Run()
+	err = cmd.Start()
 	if err != nil {
 		panic(err)
 	}
