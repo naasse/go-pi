@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 	"strconv"
+	"math/rand"
 )
 
 var (
@@ -23,37 +24,44 @@ var (
 )
 
 func initPins() {
+	pins[12] = 32
+	pins[16] = 36
 	pins[17] = 11
+	pins[20] = 38
+	pins[21] = 40
+	pins[27] = 13
 }
 
 func main() {
 	// Ensure a single argument is sent in
-	if len(os.Args) != 2 {
-		fmt.Println("Expected 1 argument. Specify the GPIO pin to blink.")
+	if len(os.Args) == 1 {
+		fmt.Println("Expected 1 or more arguments. Specify the GPIO pins to blink.")
 		os.Exit(1)
 	}
 
-	// Ensure the argument is numeric.
-	pinNumber, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		fmt.Printf("%q is not a number.\n", os.Args[1])
-		os.Exit(1)
-	}
+	// Initialize the pins to blink
+	var togglePins = make([]rpio.Pin, len(os.Args) - 1 )
 
-	// Initialize the pin mappings.
+	// Initialize the pin mappings
 	initPins()
 
-	// Ensure the mcu pin is in our pins mappings
-	physicalPin, ok := pins[pinNumber]
-	if !ok {
-		fmt.Printf("%d is not a valid pin.\n", pinNumber)
-		os.Exit(1)
+	for i:= 1; i < len(os.Args); i++ {
+		pinNumber, err:= strconv.Atoi(os.Args[i])
+		if err != nil {
+			fmt.Printf("%q is not a number.\n", os.Args[i])
+			os.Exit(1)
+		}
+
+		// Ensure the GPIO pin is in our pin mappings
+		_, ok := pins[pinNumber]
+		if !ok {
+			fmt.Printf("%d is not a valid pin.\n", pinNumber)
+			os.Exit(1)
+		}
+
+		// Add it to the array of pins to blink
+		togglePins[i - 1] = rpio.Pin(pinNumber)
 	}
-
-	fmt.Printf("%d is the physical pin.\n", physicalPin)
-
-	// The pin to toggle
-	pin = rpio.Pin(pinNumber)
 
 	// Open and map memory to access gpio, check for errors
 	if err := rpio.Open(); err != nil {
@@ -64,13 +72,18 @@ func main() {
 	// Unmap gpio memory when done
 	defer rpio.Close()
 
-	// Set pin to output mode
-	pin.Output()
+	// Set pins to output mode
+	for i:= 0; i < len(togglePins); i++ {
+		togglePins[i].Output()
+	}
 
 	fmt.Println("Blinking!")
 	for x := 0; x < 20; x++ {
-		pin.Toggle()
-		time.Sleep(time.Second / 5)
+		togglePin := togglePins[rand.Intn(len(togglePins))]
+		state := togglePin.Read()
+		fmt.Printf("Pin %d: %t -> %t\n", togglePin, state != 0, state == 0)
+		togglePin.Toggle()
+		time.Sleep(time.Second / 2)
 	}
 	fmt.Println("Done.")
 }
