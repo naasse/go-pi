@@ -10,8 +10,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 )
 
 // Check args.
@@ -27,6 +27,11 @@ func checkArgs() bool {
 	blue := false
 	if len(os.Args) > 2 {
 		blue = strings.EqualFold(os.Args[2], "BLUETOOTH")
+		if blue {
+			fmt.Println("Will play via Bluetooth.")
+		} else {
+			fmt.Println("Will play via analag audio.")
+		}
 	}
 	return blue
 }
@@ -71,13 +76,12 @@ func getRandomSong(songs []string) string {
 
 // Play the given song
 func playSong(song string, blue bool) {
-	args := []string{"-b", "--vol", "-500", song}
-	cmd := exec.Command("omxplayer", args...)
+	args := []string{"omxplayer", "-b", "--vol", "-500", song}
 	if blue {
 		args = append(args, "-o")
 		args = append(args, "alsa")
-		cmd = exec.Command("omxplayer", args...)
 	}
+	cmd := exec.Command("omxplayer", args...)
 	err := cmd.Start()
 	if err != nil {
 		fmt.Printf("Failed to start song.")
