@@ -25,6 +25,7 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 import subprocess
+import time
 
 continue_reading = True
 
@@ -50,6 +51,12 @@ uids = {
     "136.4.76.177": "first"
 }
 
+# The last time an RFID was read
+last_scan = 0
+
+# Minimum time between RFID reads (seconds)
+cooldown = 3
+
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
 while continue_reading:
     
@@ -59,22 +66,32 @@ while continue_reading:
     # If a card is found
     if status == MIFAREReader.MI_OK:
         print "RFID detected."
-    
-        # Get the UID of the card
-        (status, uid) = MIFAREReader.MFRC522_Anticoll()
-
-        # If we have the UID, continue
-        if status == MIFAREReader.MI_OK:
-
-            # Get UID
-            scanned = "{}.{}.{}.{}".format(uid[0], uid[1], uid[2], uid[3])
-
-            if scanned in uids:
-                found = uids[scanned]
-                print scanned, " => ", found
-                subprocess.call(["rand-song", "/home/pi/Music/Evie", "BLUETOOTH"])
-            else:
-                print scanned, " is not mapped."
+        
+        # Ensure scan hasn't occurred too rapidly, or the same RFID wasn't scanned twice
+        now = time.time()
+        diff = now - last_scan
+        if diff < cooldown:
+            print "Must wait", cooldown, "seconds before scanning." 
+            print "Time since last scan:", diff, "seconds."
         else:
-            print "Error reading RFID."
+            last_scan = now
+        
+
+            # Get the UID of the card
+            (status, uid) = MIFAREReader.MFRC522_Anticoll()
+
+            # If we have the UID, continue
+            if status == MIFAREReader.MI_OK:
+
+                # Get UID
+                scanned = "{}.{}.{}.{}".format(uid[0], uid[1], uid[2], uid[3])
+
+                if scanned in uids:
+                    found = uids[scanned]
+                    print scanned, "=>", found
+                    subprocess.call(["rand-song", "/home/pi/Music/Evie", "BLUETOOTH"])
+                else:
+                    print scanned, "is not mapped."
+            else:
+                print "Error reading RFID."
 
