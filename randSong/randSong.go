@@ -105,15 +105,4 @@ func main() {
 
 	// Play the song
 	playSong(song, blue)
-
-	// Begin playing
-	//cmd := exec.Command("omxplayer", "-b", "--vol", "-500", song)
-	//if blue {
-	//	cmd = exec.Command("omxplayer", "-b", "--vol", "-500", "-o", "alsa", song)
-	//}
-	//err = cmd.Start()
-	//if err != nil {
-	//	fmt.Printf("Failed to start song.")
-	//	panic(err)
-	//}
 }

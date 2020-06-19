@@ -48,7 +48,7 @@ print "Press Ctrl-C to stop."
 
 # Dictionary of known RFID UID
 uids = {
-    "136.4.76.177": "first"
+    "136.4.76.177": "/home/pi/Music/Evie/The_Wheels_On_The_Bus.mp3"
 }
 
 # The last time an RFID was read
@@ -87,9 +87,9 @@ while continue_reading:
                 scanned = "{}.{}.{}.{}".format(uid[0], uid[1], uid[2], uid[3])
 
                 if scanned in uids:
-                    found = uids[scanned]
-                    print scanned, "=>", found
-                    subprocess.call(["rand-song", "/home/pi/Music/Evie", "BLUETOOTH"])
+                    song = uids[scanned]
+                    print scanned, "=>", song
+                    subprocess.call(["playSong", song, "BLUETOOTH"])
                 else:
                     print scanned, "is not mapped."
             else:
