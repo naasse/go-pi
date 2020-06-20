@@ -16,7 +16,9 @@ Toggle a given GPIO pin on (high/low) to make LEDs blink.
 
 ## rfid
 
-Begin listening on RFID (RFC522). When a known RFID UID is detected, play the song that it maps to via omxplayer over a Bluetooth speaker.
+Begin listening on RFID (RFC522). When a known RFID UID is detected, play the song that it maps to via VLC.
+
+Volume controls should be controlled by the device, defaults, and VLC should be marked to Play and exit.
 
 ### Dependencies
 
@@ -30,8 +32,8 @@ TODO: Convert to Go.
 
 ## songPlayer
 
-Play a given song, or a random song in a given directory. Uses omxplayer, which comes native on Raspberry Pi OS. Supports playing via Bluetooth or analog audio out.
+Play a given song, or a random song in a given directory. Uses VLC media player, which comes native on Raspberry Pi OS.
 
 ### Usage
 
-`go run songPlayer/main.go {song | directory} {BLUETOOTH?}`
+`go run songPlayer/main.go {song | directory}`

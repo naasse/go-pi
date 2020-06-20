@@ -54,7 +54,8 @@ uids = {
     "136.4.52.177": "/home/pi/Music/Evie/The_Wheels_On_The_Bus.mp3", # Elmo
     "136.4.68.177": "/home/pi/Music/Evie/Twinkle_Twinkle_Little_Star.mp3", # Cookie Monster
     "136.4.158.176": "/home/pi/Music/Evie/Baby_Shark.mp3", # Oscar
-    "136.4.148.176": "/home/pi/Music/Evie/Head_Shoulders_Knees_and_Toes.mp3" # Grover
+    "136.4.148.176": "/home/pi/Music/Evie/Head_Shoulders_Knees_and_Toes.mp3", # Grover
+    "136.4.140.176": "/home/pi/Music/Evie/Old_MacDonald_Had_A_Farm.mp3" # Abby
 }
 
 # The last time an RFID was read
@@ -90,15 +91,15 @@ while continue_reading:
                     song = uids[scanned]
 
                     # Check if there's anything playing
-                    omxplayer_running = False
+                    vlc_running = False
                     for proc in psutil.process_iter():
                         try:
-                            if "omxplayer" in proc.name().lower():
-                                omxplayer_running = True
+                            if "vlc" in proc.name().lower():
+                                vlc_running = True
                         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                             pass
 
-                    if song != current_song or not omxplayer_running:
+                    if song != current_song or not vlc_running:
                         current_song = song
                         subprocess.call(["/home/pi/go/bin/songPlayer", song, "BLUETOOTH"])
                 else:

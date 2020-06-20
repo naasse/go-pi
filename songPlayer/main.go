@@ -15,50 +15,27 @@ import (
 
 // Check args.
 // 0: File to play/directory to find random song.
-// 1: [optional] BLUETOOTH (case-insensitive) will play via omxplayer alsa output
-// returns whether or not bluetooth is set.
-func checkArgs() bool {
+func checkArgs() {
 	// Ensure a file argument is sent in
 	if len(os.Args) < 2 {
-		fmt.Println("Expected 1 or 2 arguments. Specify the song file, or a directory for random song.")
-		fmt.Println("BLUETOOTH flag is optional.")
+		fmt.Println("Expected 1  argument. Specify the song file, or a directory for random song.")
 		os.Exit(1)
 	}
-	blue := false
-	if len(os.Args) > 2 {
-		blue = strings.EqualFold(os.Args[2], "BLUETOOTH")
-		if blue {
-			fmt.Println("Will play via Bluetooth.")
-		} else {
-			fmt.Println("Will play via analag audio.")
-		}
-	}
-	return blue
 }
 
-// Kill any existing omxplayers
-func killOmx() {
-	err := exec.Command("killall", "omxplayer.bin").Run()
-	if err != nil {
-		fmt.Println("Failed to kill players. This may be expected, if none exist.")
-	}
-	// Sleep for 1 second in case there's any process cleanup not complete
-	time.Sleep(1 * time.Second)
+// Kill any existing vlc processes
+func killVlc() {
+	exec.Command("killall", "vlc").Run()
 }
 
 // Play the given song
-func playSong(song string, blue bool) {
-	args := []string{"-b", "--vol", "-3000", "-l", "0", song}
-	if blue {
-		args = append(args, "-o")
-		args = append(args, "alsa")
-	}
+func playSong(song string) {
 	fmt.Printf("Now Playing: %s\n", song)
-	cmd := exec.Command("omxplayer", args...)
+	cmd := exec.Command("vlc", song)
 	err := cmd.Start()
 	if err != nil {
 		fmt.Printf("Failed to start song.")
-		killOmx()
+		killVlc()
 		panic(err)
 	}
 	time.Sleep(1 * time.Second)
@@ -66,8 +43,8 @@ func playSong(song string, blue bool) {
 
 // Main method
 func main() {
-	// Check args, determine audio output device
-	blue := checkArgs()
+	// Check args
+	checkArgs()
 
 	song := os.Args[1]
 	// Check if a song or directory was passed in.
@@ -77,8 +54,8 @@ func main() {
 	}
 
 	// Ensure no other songs are playing
-	killOmx()
+	killVlc()
 
 	// Play the song
-	playSong(song, blue)
+	playSong(song)
 }
