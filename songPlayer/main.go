@@ -1,27 +1,27 @@
 /*
-Play a random song in a specified directory.
+Play a specified song from disk
 */
 
 package main
 
 import (
 	"fmt"
-	"math/rand"
+	"go-pi/songPlayer/randSong"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 )
 
 // Check args.
-// 0: Root directory to find a song in.
+// 0: File to play/directory to find random song.
 // 1: [optional] BLUETOOTH (case-insensitive) will play via omxplayer alsa output
 // returns whether or not bluetooth is set.
 func checkArgs() bool {
-	// Ensure a directory argument is sent in
+	// Ensure a file argument is sent in
 	if len(os.Args) < 2 {
-		fmt.Println("Expected 1 or 2 arguments. Specify the directory. BLUETOOTH flag is optional.")
+		fmt.Println("Expected 1 or 2 arguments. Specify the song file, or a directory for random song.")
+		fmt.Println("BLUETOOTH flag is optional.")
 		os.Exit(1)
 	}
 	blue := false
@@ -36,23 +36,6 @@ func checkArgs() bool {
 	return blue
 }
 
-// Get available songs
-func getSongs(root string) []string {
-	// Build a list of all files in the specified directory
-	var files []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if path != root {
-			files = append(files, path)
-		}
-		return nil
-	})
-	if err != nil {
-		fmt.Println("Failed to read the directory?")
-		panic(err)
-	}
-	return files
-}
-
 // Kill any existing omxplayers
 func killOmx() {
 	err := exec.Command("killall", "omxplayer.bin").Run()
@@ -63,17 +46,6 @@ func killOmx() {
 	time.Sleep(2 * time.Second)
 }
 
-// Get a random song
-func getRandomSong(songs []string) string {
-	// Set the random seed
-	rand.Seed(time.Now().UnixNano())
-
-	// Get a random song
-	song := songs[rand.Intn(len(songs))]
-	fmt.Printf("Now Playing: %s\n", song)
-	return song
-}
-
 // Play the given song
 func playSong(song string, blue bool) {
 	args := []string{"omxplayer", "-b", "--vol", "-500", song}
@@ -81,6 +53,7 @@ func playSong(song string, blue bool) {
 		args = append(args, "-o")
 		args = append(args, "alsa")
 	}
+	fmt.Printf("Now Playing: %s\n", song)
 	cmd := exec.Command("omxplayer", args...)
 	err := cmd.Start()
 	if err != nil {
@@ -94,14 +67,16 @@ func playSong(song string, blue bool) {
 func main() {
 	// Check args, determine audio output device
 	blue := checkArgs()
-	// Find list of available songs
-	songs := getSongs(os.Args[1])
+
+	song := os.Args[1]
+	// Check if a song or directory was passed in.
+	if !strings.HasSuffix(song, ".mp3") {
+		// It's not an mp3. Get a random song from the directory.
+		song = randSong.GetRandomSong(song)
+	}
 
 	// Ensure no other songs are playing
 	killOmx()
-
-	// Play a random song
-	song := getRandomSong(songs)
 
 	// Play the song
 	playSong(song, blue)
