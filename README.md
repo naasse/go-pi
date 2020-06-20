@@ -18,6 +18,10 @@ Toggle a given GPIO pin on (high/low) to make LEDs blink.
 
 Begin listening on RFID (RFC522). When a known RFID UID is detected, play the song that it maps to via omxplayer over a Bluetooth speaker.
 
+### Dependencies
+
+* [psutil](https://pypi.org/project/psutil/)
+
 ### Usage
 
 `python2 rfid/read.py`

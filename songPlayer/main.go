@@ -42,13 +42,13 @@ func killOmx() {
 	if err != nil {
 		fmt.Println("Failed to kill players. This may be expected, if none exist.")
 	}
-	// Sleep for 2 seconds in case there's any process cleanup not complete
-	time.Sleep(2 * time.Second)
+	// Sleep for 1 second in case there's any process cleanup not complete
+	time.Sleep(1 * time.Second)
 }
 
 // Play the given song
 func playSong(song string, blue bool) {
-	args := []string{"-b", "--vol", "-3000", song}
+	args := []string{"-b", "--vol", "-3000", "-l", "0", song}
 	if blue {
 		args = append(args, "-o")
 		args = append(args, "alsa")
@@ -61,6 +61,7 @@ func playSong(song string, blue bool) {
 		killOmx()
 		panic(err)
 	}
+	time.Sleep(1 * time.Second)
 }
 
 // Main method

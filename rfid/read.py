@@ -26,8 +26,11 @@ import MFRC522
 import signal
 import subprocess
 import time
+import psutil
 
 continue_reading = True
+
+current_song = None
 
 # Capture SIGINT for cleanup when the script is aborted
 def end_read(signal,frame):
@@ -49,7 +52,9 @@ print "Press Ctrl-C to stop."
 # Dictionary of known RFID UID
 uids = {
     "136.4.52.177": "/home/pi/Music/Evie/The_Wheels_On_The_Bus.mp3", # Elmo
-    "136.4.68.177": "/home/pi/Music/Evie/Twinkle_Twinkle_Little_Star.mp3" # Cookie Monster
+    "136.4.68.177": "/home/pi/Music/Evie/Twinkle_Twinkle_Little_Star.mp3", # Cookie Monster
+    "136.4.158.176": "/home/pi/Music/Evie/Baby_Shark.mp3", # Oscar
+    "136.4.148.176": "/home/pi/Music/Evie/Head_Shoulders_Knees_and_Toes.mp3" # Grover
 }
 
 # The last time an RFID was read
@@ -66,15 +71,10 @@ while continue_reading:
 
     # If a card is found
     if status == MIFAREReader.MI_OK:
-        print "RFID detected."
-        
         # Ensure scan hasn't occurred too rapidly, or the same RFID wasn't scanned twice
         now = time.time()
         diff = now - last_scan
-        if diff < cooldown:
-            print "Must wait", cooldown, "seconds before scanning." 
-            print "Time since last scan:", diff, "seconds."
-        else:
+        if diff >= cooldown:
             last_scan = now 
 
             # Get the UID of the card
@@ -88,8 +88,19 @@ while continue_reading:
 
                 if scanned in uids:
                     song = uids[scanned]
-                    print scanned, "=>", song
-                    subprocess.call(["/home/pi/go/bin/songPlayer", song, "BLUETOOTH"])
+
+                    # Check if there's anything playing
+                    omxplayer_running = False
+                    for proc in psutil.process_iter():
+                        try:
+                            if "omxplayer" in proc.name().lower():
+                                omxplayer_running = True
+                        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                            pass
+
+                    if song != current_song or not omxplayer_running:
+                        current_song = song
+                        subprocess.call(["/home/pi/go/bin/songPlayer", song, "BLUETOOTH"])
                 else:
                     print scanned, "is not mapped."
             else:
