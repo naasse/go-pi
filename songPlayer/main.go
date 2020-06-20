@@ -48,7 +48,7 @@ func killOmx() {
 
 // Play the given song
 func playSong(song string, blue bool) {
-	args := []string{"-b", "--vol", "-500", song}
+	args := []string{"-b", "--vol", "-3000", song}
 	if blue {
 		args = append(args, "-o")
 		args = append(args, "alsa")

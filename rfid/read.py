@@ -56,7 +56,7 @@ uids = {
 last_scan = 0
 
 # Minimum time between RFID reads (seconds)
-cooldown = 3
+cooldown = 2
 
 # This loop keeps checking for chips. If one is near it will get the UID and authenticate
 while continue_reading:
@@ -75,8 +75,7 @@ while continue_reading:
             print "Must wait", cooldown, "seconds before scanning." 
             print "Time since last scan:", diff, "seconds."
         else:
-            last_scan = now
-        
+            last_scan = now 
 
             # Get the UID of the card
             (status, uid) = MIFAREReader.MFRC522_Anticoll()
@@ -90,7 +89,7 @@ while continue_reading:
                 if scanned in uids:
                     song = uids[scanned]
                     print scanned, "=>", song
-                    subprocess.call(["songPlayer", song, "BLUETOOTH"])
+                    subprocess.call(["/home/pi/go/bin/songPlayer", song, "BLUETOOTH"])
                 else:
                     print scanned, "is not mapped."
             else:
