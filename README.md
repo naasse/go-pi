@@ -28,7 +28,22 @@ Volume controls should be controlled by the device, defaults, and VLC should be 
 
 `python2 rfid/read.py`
 
-TODO: Convert to Go.
+The primary intent for this script is to run on boot.
+
+Modify or create `~/.config/lxsession/LXDE-pi/autostart` as follows:
+
+```
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+@xscreensave -no-splash
+@lxterminal --comand="python2 /home/pi/go/src/go-pi/rfid/read.py"
+```
+
+Only the final line is necessary, but since this will override `/etc/xdg/lxsession/LXDE-pi/autostart`, you probably want to copy that file's contents over.
+
+### TODO
+
+Convert to Go.
 
 ## songPlayer
 

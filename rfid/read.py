@@ -101,7 +101,7 @@ while continue_reading:
 
                     if song != current_song or not vlc_running:
                         current_song = song
-                        subprocess.call(["/home/pi/go/bin/songPlayer", song, "BLUETOOTH"])
+                        subprocess.call(["/home/pi/go/bin/songPlayer", song])
                 else:
                     print scanned, "is not mapped."
             else:
